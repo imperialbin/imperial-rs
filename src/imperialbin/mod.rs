@@ -1,5 +1,5 @@
 
-mod post_request_builder;
+pub mod post_request_builder;
 
 // Function to create an empty Imperialbin Client
 pub fn init() -> ImperialbinClient {
