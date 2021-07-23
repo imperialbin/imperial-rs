@@ -10,7 +10,9 @@ mod tests {
         use crate::imperialbin;
         let imperialbin_client = imperialbin::init();
         let response = imperialbin_client.post(String::from("Hello")).send()?;
-        println!("{}", response);
+        
+        
+        println!("{}", response.rawLink);
         Ok(())
     }
 }
