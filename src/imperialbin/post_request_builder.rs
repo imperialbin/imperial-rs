@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 
 // Object/Struct to contain api_token and have functions to send the request. 
 // It stores a PostRequest which has all the data that is needed in the request
@@ -7,11 +8,12 @@ pub struct PostRequestBuilder {
 }
 
 // This stores the needed data for the api request
+#[allow(non_snake_case)]
 pub struct PostRequest {
     code: String,
-    longer_urls: bool,
-    image_embed: bool,
-    instant_delete: bool,
+    longerUrls: bool,
+    imageEmbed: bool,
+    instantDelete: bool,
     encrypted: bool,
     password: String,
     expiration: i32,
@@ -20,17 +22,23 @@ pub struct PostRequest {
 
 // This is a struct for the response
 // It also stores a PostResponseDocument which is a specific json object that we get in the response.
+#[allow(non_snake_case)]
 pub struct PostResponse {
     success: bool,
-    raw_link: Option<String>,
-    formatted_link: Option<String>,
+    rawLink: Option<String>,
+    formattedLink: Option<String>,
     document: Option<PostResponseDocument>,
     message: Option<String>
 }
 
 // This is the rust implementation of the json object which exists in the response
+#[allow(non_snake_case)]
 pub struct PostResponseDocument {
-
+    documentId: String,
+    language: String,
+    imageEmbed: bool,
+    instantDelete: bool,
+    creationDate: i32,
 }
 
 /*
@@ -93,9 +101,9 @@ pub fn new() -> PostRequestBuilder {
         api_token: String::new(),
         post_request: PostRequest {
             code: String::new(),
-            longer_urls: false,
-            image_embed: false,
-            instant_delete: false,
+            longerUrls: false,
+            imageEmbed: false,
+            instantDelete: false,
             encrypted: false,
             password: String::new(),
             expiration: 5,
