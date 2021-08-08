@@ -139,7 +139,7 @@ impl PostRequestBuilder {
                     document: serde_json::from_value(response_json["document"].clone())?
                 })
             },
-            s => Err(anyhow::format_err!(format!("tf. not OK 200 response. this is sussy. its {}. response text: {}", s, response.text()?)))
+            s => Err(anyhow::format_err!(format!("Got response {}. response text: {}", s, response.text()?)))
         }
     }
     
