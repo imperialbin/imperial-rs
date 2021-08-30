@@ -25,6 +25,6 @@ impl ImperialbinClient {
     }
 
     pub fn retrieve(&self, document_id: String) -> retrieve_request_builder::RetrieveRequestBuilder {
-        retrieve_request_builder::new().document_id(document_id).api_token(self.api_token.clone())
+        retrieve_request_builder::new(document_id).api_token(self.api_token.clone())
     }
 }
