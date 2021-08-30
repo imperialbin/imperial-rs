@@ -12,7 +12,9 @@ mod tests {
         let response = imperialbin_client.post(String::from("Hello")).send()?;
         
         
-        println!("{}", response.rawLink);
+        println!("{}", response.document.documentId.clone());
+        let retrieve_response = imperialbin_client.retrieve(response.document.documentId.clone()).send()?;
+        println!("{}", retrieve_response.content);
         Ok(())
     }
 }
