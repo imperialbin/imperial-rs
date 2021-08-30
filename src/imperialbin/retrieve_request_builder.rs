@@ -1,5 +1,5 @@
-use serde_json::Value;
-
+use serde_json::{Value, Number};
+use serde::{Deserialize};
 #[allow(non_snake_case)]
 pub struct RetrieveRequestBuilder {
     apiToken: String,
@@ -7,30 +7,36 @@ pub struct RetrieveRequestBuilder {
 }
 
 pub struct RetrieveResponse {
-    success: bool,
-    content: String,
-    document: RetrieveResponseDocument
+    pub success: bool,
+    pub content: String,
+    pub document: RetrieveResponseDocument
 }
 
+#[allow(non_snake_case)]
+#[derive(Deserialize)]
 pub struct RetrieveResponseDocument {
+    pub documentId: String,
+    pub language: String,
+    pub imageEmbed: bool,
+    pub instantDelete: bool,
+    pub creationDate: Number,
+    pub expirationDate: Number,
+    pub allowedEditors: Vec<String>,
+    pub encrypted: bool,
+    pub views: Number
 
 }
 
-pub fn new(documentId: String) -> RetrieveRequestBuilder{
+pub fn new(document_id: String) -> RetrieveRequestBuilder{
     RetrieveRequestBuilder {
         apiToken: String::new(),
-        documentId: documentId,
+        documentId: document_id,
     }
 }
 
 impl RetrieveRequestBuilder {
     pub fn api_token(mut self, api_token: String) -> Self {
         self.apiToken = api_token;
-        self
-    }
-
-    pub fn document_id(mut self, document_id: String) -> Self {
-        self.documentId = document_id;
         self
     }
 
@@ -51,21 +57,24 @@ impl RetrieveRequestBuilder {
                     let response_text = response.text()?;
                     serde_json::from_str(&response_text[..])?
                 };
-
                 
+                return Ok(RetrieveResponse {
+                    success: match response_json["success"].clone() {
+                        Value::Bool(e) => e,
+                        _ => false,
+                    },
+                    content: match response_json["content"].clone() {
+                        Value::String(s) => s,
+                        _ => String::from("No content. Stuff might be bad serverside"),
+                    },
+                    document: serde_json::from_value(response_json.clone())?,
+                })
 
 
             }
-            _ => {}
+            _ => {
+                return Err(anyhow::format_err!("Non OK status code"))
+            }
         }
-
-
-        Ok(RetrieveResponse {
-            success: true,
-            content: String::new(),
-            document: RetrieveResponseDocument {
-
-            }
-        })
     }
 }
