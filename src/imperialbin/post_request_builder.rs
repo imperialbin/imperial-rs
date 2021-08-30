@@ -60,17 +60,17 @@ impl PostRequestBuilder {
         self.post_request.code = code;
         self
     }
-
+    #[allow(non_snake_case)]
     pub fn longerUrls(mut self, longerUrls: bool) -> Self {
         self.post_request.longerUrls = longerUrls;
         self
     }
-
+    #[allow(non_snake_case)]
     pub fn imageEmbed(mut self, imageEmbed: bool ) -> Self {
         self.post_request.imageEmbed = imageEmbed;
         self
     }
-
+    #[allow(non_snake_case)]
     pub fn instantDelete(mut self, instantDelete: bool) -> Self {
         self.post_request.instantDelete = instantDelete;
         self
