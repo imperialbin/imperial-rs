@@ -1,74 +1,69 @@
-use serde_json::{Value, Number};
+use serde_json::Number;
 use serde::{Deserialize};
-#[allow(non_snake_case)]
-pub struct RetrieveRequestBuilder {
-    apiToken: String,
-    documentId: String,
-}
 
+
+pub struct RetrieveRequestBuilder {
+    api_token: String,
+    document_id: String,
+} // A RetrieveRequestBuilder which contains the specific required parts for a request and apiToken
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct RetrieveResponse {
     pub success: bool,
     pub content: String,
     pub document: RetrieveResponseDocument
-}
+} // This is the "lowest" part of the json. It contains the document which are the part with all the data about the document.
 
-#[allow(non_snake_case)]
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct RetrieveResponseDocument {
-    pub documentId: String,
+    pub document_id: String,
     pub language: String,
-    pub imageEmbed: bool,
-    pub instantDelete: bool,
-    pub creationDate: Number,
-    pub expirationDate: Number,
-    pub allowedEditors: Vec<String>,
+    pub image_embed: bool,
+    pub instant_delete: bool,
+    pub creation_date: Number,
+    pub expiration_date: Number,
+    pub allowed_editors: Vec<String>,
     pub encrypted: bool,
     pub views: Number
 
-}
+} // This contains all data about the document. It is based around the document which exists in the API.
 
 pub fn new(document_id: String) -> RetrieveRequestBuilder{
     RetrieveRequestBuilder {
-        apiToken: String::new(),
-        documentId: document_id,
+        api_token: String::new(),
+        document_id: document_id,
     }
-}
+} // This function creates an empty instance of the RetrieveRequestBuilder
 
 impl RetrieveRequestBuilder {
     pub fn api_token(mut self, api_token: String) -> Self {
-        self.apiToken = api_token;
+        self.api_token = api_token;
         self
     }
 
     pub fn send(self) -> anyhow::Result<RetrieveResponse> {
         
         let http_client = reqwest::blocking::Client::new();
-        let mut request_builder = http_client.get(format!("https://imperialb.in/api/document/{}", self.documentId));
+        let mut request_builder = http_client.get(format!("https://imperialb.in/api/document/{}", self.document_id));
         
-        if self.apiToken != "" {
-            request_builder = request_builder.header("authorization", &self.apiToken);
+        if self.api_token != "" {
+            request_builder = request_builder.header("authorization", &self.api_token);
         }
 
         let response = request_builder.send()?;
 
         match response.status() {
             reqwest::StatusCode::OK => {
-                let response_json: Value = {
+                /*let response_json: Value = {
                     let response_text = response.text()?;
                     serde_json::from_str(&response_text[..])?
-                };
+                };*/
+
+                let response_text = response.text()?;
                 
-                return Ok(RetrieveResponse {
-                    success: match response_json["success"].clone() {
-                        Value::Bool(e) => e,
-                        _ => false,
-                    },
-                    content: match response_json["content"].clone() {
-                        Value::String(s) => s,
-                        _ => String::from("No content. Stuff might be bad serverside"),
-                    },
-                    document: serde_json::from_value(response_json["document"].clone())?,
-                })
+                return Ok(serde_json::from_str::<RetrieveResponse>(&response_text)?)
 
 
             }

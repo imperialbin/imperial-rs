@@ -2,6 +2,8 @@
 pub mod post_request_builder;
 pub mod retrieve_request_builder;
 
+// TODO: Allow other imperialb.in instances
+
 // Function to create an empty Imperialbin Client
 pub fn init() -> ImperialbinClient {
     return ImperialbinClient {
