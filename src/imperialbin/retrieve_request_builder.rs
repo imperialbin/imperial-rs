@@ -67,7 +67,7 @@ impl RetrieveRequestBuilder {
                         Value::String(s) => s,
                         _ => String::from("No content. Stuff might be bad serverside"),
                     },
-                    document: serde_json::from_value(response_json.clone())?,
+                    document: serde_json::from_value(response_json["document"].clone())?,
                 })
 
 

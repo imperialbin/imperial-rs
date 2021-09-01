@@ -13,7 +13,7 @@ mod tests {
         
         
         println!("{}", response.document.documentId.clone());
-        let retrieve_response = imperialbin_client.retrieve(response.document.documentId.clone()).send()?;
+        let retrieve_response = imperialbin_client.retrieve(response.document.documentId).send()?;
         println!("{}", retrieve_response.content);
         Ok(())
     }
