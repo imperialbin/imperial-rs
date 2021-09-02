@@ -10,6 +10,7 @@ fn default_string() -> String {
 // It stores a PostRequest which has all the data that is needed in the request
 pub struct PostRequestBuilder {
     api_token: String,
+    base_url: String,
     post_request: PostRequest
 }
 
@@ -59,10 +60,6 @@ pub struct PostResponseDocument {
 impl PostRequestBuilder {
 
     // Functions to change different values. They return itself to allow chaining together
-    pub fn api_token(mut self, api_token: String) -> Self {
-        self.api_token = api_token;
-        self
-    }
 
     pub fn code(mut self, code: String) -> Self {
         self.post_request.code = code;
@@ -109,13 +106,17 @@ impl PostRequestBuilder {
         let http_client = reqwest::blocking::Client::new();
 
         let json_body = serde_json::to_string(&self.post_request)?;
-        let mut request_builder = http_client.post("https://imperialb.in/api/document")
+        let url = format!("{}/api/document", self.base_url);
+
+        let mut request_builder = http_client.post(url)
         .body(json_body)
         .header("content-type", "application/json");
+        
         // If we have a api_token in configuration make sure to use it in the request.
         if self.api_token != "" {
             request_builder = request_builder.header("authorization", &self.api_token);
         }
+        
         // Send the request and get a response back.
         let response = request_builder.send()?;
         match response.status() {
@@ -130,9 +131,10 @@ impl PostRequestBuilder {
     
 }
 
-pub fn new() -> PostRequestBuilder {
+pub fn new(api_token: String, base_url: String) -> PostRequestBuilder {
     PostRequestBuilder {
-        api_token: String::new(),
+        api_token: api_token,
+        base_url: base_url,
         post_request: PostRequest {
             code: String::new(),
             longer_urls: false,

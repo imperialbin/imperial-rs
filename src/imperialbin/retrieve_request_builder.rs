@@ -4,6 +4,7 @@ use serde::{Deserialize};
 
 pub struct RetrieveRequestBuilder {
     api_token: String,
+    base_url: String,
     document_id: String,
 } // A RetrieveRequestBuilder which contains the specific required parts for a request and apiToken
 
@@ -30,9 +31,10 @@ pub struct RetrieveResponseDocument {
 
 } // This contains all data about the document. It is based around the document which exists in the API.
 
-pub fn new(document_id: String) -> RetrieveRequestBuilder{
+pub fn new(api_token: String, base_url: String, document_id: String) -> RetrieveRequestBuilder{
     RetrieveRequestBuilder {
-        api_token: String::new(),
+        api_token: api_token,
+        base_url: base_url,
         document_id: document_id,
     }
 } // This function creates an empty instance of the RetrieveRequestBuilder
@@ -46,7 +48,10 @@ impl RetrieveRequestBuilder {
     pub fn send(self) -> anyhow::Result<RetrieveResponse> {
         
         let http_client = reqwest::blocking::Client::new();
-        let mut request_builder = http_client.get(format!("https://imperialb.in/api/document/{}", self.document_id));
+
+        let url = format!("{}/api/document/{}", self.base_url, self.document_id);
+
+        let mut request_builder = http_client.get(url);
         
         if self.api_token != "" {
             request_builder = request_builder.header("authorization", &self.api_token);
@@ -56,10 +61,6 @@ impl RetrieveRequestBuilder {
 
         match response.status() {
             reqwest::StatusCode::OK => {
-                /*let response_json: Value = {
-                    let response_text = response.text()?;
-                    serde_json::from_str(&response_text[..])?
-                };*/
 
                 let response_text = response.text()?;
                 
