@@ -64,9 +64,25 @@ impl RetrieveRequestBuilder {
 
                 let response_text = response.text()?;
                 
-                return Ok(serde_json::from_str::<RetrieveResponse>(&response_text)?)
-
-
+                Ok(serde_json::from_str::<RetrieveResponse>(&response_text)?)
+            },
+            reqwest::StatusCode::BAD_REQUEST => {
+                Err(anyhow::anyhow!("Non-valid document id"))
+            },
+            reqwest::StatusCode::UNAUTHORIZED => {
+                Err(anyhow::anyhow!("You need to provide password"))
+            },
+            reqwest::StatusCode::NOT_FOUND => {
+                Err(anyhow::anyhow!("Document couldn't be found"))
+            },
+            reqwest::StatusCode::FORBIDDEN => {
+                Err(anyhow::anyhow!("Incorrect password to encrypted document"))
+            },
+            reqwest::StatusCode::TOO_MANY_REQUESTS => {
+                Err(anyhow::anyhow!("Too many requests. Implement a rate limit."))
+            },
+            reqwest::StatusCode::INTERNAL_SERVER_ERROR => {
+                Err(anyhow::anyhow!("Internal Server Error."))
             }
             _ => {
                 return Err(anyhow::format_err!("Non OK status code"))

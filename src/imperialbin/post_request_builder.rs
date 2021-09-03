@@ -123,8 +123,17 @@ impl PostRequestBuilder {
             // TODO: Implement all the responses
             reqwest::StatusCode::OK => {
                 let response_text = response.text()?;
-                return Ok(serde_json::from_str::<PostResponse>(&response_text)?)
+                Ok(serde_json::from_str::<PostResponse>(&response_text)?)
             },
+            reqwest::StatusCode::BAD_REQUEST => {
+                Err(anyhow::anyhow!("Bad Request. Check imperialb.in API documentation"))
+            },
+            reqwest::StatusCode::TOO_MANY_REQUESTS => {
+                Err(anyhow::anyhow!("Too many requests. Implement a rate limit."))
+            },
+            reqwest::StatusCode::INTERNAL_SERVER_ERROR => {
+                Err(anyhow::anyhow!("Internal Server Error."))
+            }
             s => Err(anyhow::format_err!(format!("Got response {}. response text: {}", s, response.text()?)))
         }
     }

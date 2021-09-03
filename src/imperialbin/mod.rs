@@ -28,10 +28,7 @@ impl ImperialbinClient {
 
     pub fn post(&self, code: String) -> post_request_builder::PostRequestBuilder {
         // Creating a PostRequestBuilder which you can change different arguments with.
-
-
         post_request_builder::new(self.api_token.clone(), self.base_url.clone()).code(code)
-
     }
 
     pub fn retrieve(&self, document_id: String) -> retrieve_request_builder::RetrieveRequestBuilder {
