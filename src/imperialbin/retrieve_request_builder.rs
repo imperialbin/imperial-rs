@@ -1,6 +1,20 @@
 use serde_json::Number;
 use serde::{Deserialize};
 
+#[derive(Debug)]
+pub enum Errors {
+    BadRequest(anyhow::Error),
+    Unauthorized(anyhow::Error),
+    NotFound(anyhow::Error),
+    Forbidden(anyhow::Error),
+    TooManyRequests(anyhow::Error),
+    InternalServerError(anyhow::Error),
+    NonImplementedResponse(anyhow::Error),
+    RequestSendError(reqwest::Error),
+    ResponseTextError(reqwest::Error),
+    ResponseJsonError(serde_json::Error),
+}
+
 
 pub struct RetrieveRequestBuilder {
     api_token: String,
@@ -45,7 +59,7 @@ impl RetrieveRequestBuilder {
         self
     }
 
-    pub fn send(self) -> anyhow::Result<RetrieveResponse> {
+    pub fn send(self) -> Result<RetrieveResponse, Errors> {
         
         let http_client = reqwest::blocking::Client::new();
 
@@ -57,35 +71,44 @@ impl RetrieveRequestBuilder {
             request_builder = request_builder.header("authorization", &self.api_token);
         }
 
-        let response = request_builder.send()?;
+        let response = match request_builder.send() {
+            Ok(r) => r,
+            Err(e) => return Err(Errors::RequestSendError(e))
+        };
 
         match response.status() {
             reqwest::StatusCode::OK => {
 
-                let response_text = response.text()?;
+                let response_text = match response.text() {
+                    Ok(s) => s,
+                    Err(e) => return Err(Errors::ResponseTextError(e))
+                };
                 
-                Ok(serde_json::from_str::<RetrieveResponse>(&response_text)?)
+                match serde_json::from_str::<RetrieveResponse>(&response_text) {
+                    Ok(s) => Ok(s),
+                    Err(e) => Err(Errors::ResponseJsonError(e))
+                }
             },
             reqwest::StatusCode::BAD_REQUEST => {
-                Err(anyhow::anyhow!("Non-valid document id"))
+                Err(Errors::BadRequest(anyhow::anyhow!("Non-valid document id")))
             },
             reqwest::StatusCode::UNAUTHORIZED => {
-                Err(anyhow::anyhow!("You need to provide password"))
+                Err(Errors::Unauthorized(anyhow::anyhow!("You need to provide password")))
             },
             reqwest::StatusCode::NOT_FOUND => {
-                Err(anyhow::anyhow!("Document couldn't be found"))
+                Err(Errors::NotFound(anyhow::anyhow!("Document couldn't be found")))
             },
             reqwest::StatusCode::FORBIDDEN => {
-                Err(anyhow::anyhow!("Incorrect password to encrypted document"))
+                Err(Errors::Forbidden(anyhow::anyhow!("Incorrect password to encrypted document")))
             },
             reqwest::StatusCode::TOO_MANY_REQUESTS => {
-                Err(anyhow::anyhow!("Too many requests. Implement a rate limit."))
+                Err(Errors::TooManyRequests(anyhow::anyhow!("Too many requests. Implement a rate limit.")))
             },
             reqwest::StatusCode::INTERNAL_SERVER_ERROR => {
-                Err(anyhow::anyhow!("Internal Server Error."))
+                Err(Errors::InternalServerError(anyhow::anyhow!("Internal Server Error.")))
             }
             _ => {
-                return Err(anyhow::format_err!("Non OK status code"))
+                return Err(Errors::NonImplementedResponse(anyhow::format_err!("Non implemented response.")))
             }
         }
     }

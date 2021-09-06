@@ -3,6 +3,10 @@ name = "imperial-rs"
 version = "0.1.0"
 authors = ["ripSquid"]
 edition = "2018"
+license = "MPL-2.0"
+description = "A package for working with the https://imperailb.in api"
+homepage = "https://github.com/imperialbin/imperial-rs"
+repository = "https://github.com/imperialbin/imperial-rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
